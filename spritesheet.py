@@ -31,7 +31,7 @@ class spritesheet(object):
         return self.images_at(tups, colorkey)
 
 
-if __name__ == '__main__':
+"""if __name__ == '__main__':
     pygame.init()
     img_size = 33
     rows = 10
@@ -63,3 +63,4 @@ if __name__ == '__main__':
         screen.blit(battleship, (mx, my))
 
         pygame.display.flip()
+"""

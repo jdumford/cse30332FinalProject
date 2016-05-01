@@ -15,8 +15,8 @@ from twisted.internet import reactor
 from twisted.internet.defer import DeferredQueue
 #from twisted.internet.task import LoopingCall
 
-P1_PORT = 40056
-P2_PORT = 41056
+P1_PORT = 40073
+P2_PORT = 41073
 
 
 #class to handle the connection to player 1
