@@ -2,6 +2,7 @@ from twisted.internet import reactor
 from twisted.internet.protocol import ClientFactory, Protocol
 from twisted.internet.task import LoopingCall
 import pygame
+from spritesheet import spritesheet
 
 SERVER_HOST = "student02.cse.nd.edu"
 SERVER_PORT = 40073
