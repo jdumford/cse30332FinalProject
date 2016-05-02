@@ -43,6 +43,7 @@ class PlayerConnection(Protocol):
 
 	def dataReceived(self,data):
 		"""Receive "ready to start" and mouse position of opponent's missle fire"""
+		print "Data received from P2 is {0}".format(data)
 		if data == "ready":
 			self.myturn = True
 		else:
@@ -55,17 +56,19 @@ class PlayerConnection(Protocol):
 	def connectionLost(self,reason):
 		print "Connection lost to ",self.addr
 
-	def determineOutcome(x_old,y_old):
+	def determineOutcome(self,x_old,y_old):
 		"""calculate x,y position on 10x10 board, check spot type, perform appropriate action"""
 		x_new = int(math.floor(x_old/34))
 		y_new = int(math.floor(y_old/34))
+		print "xnew and ynew = {0} {1}".format(x_new,y_new)
 		space_type = self.board1.getSpace(x_new,y_new)
+		print "space type = {0}".format(space_type)
 		if space_type == 1:
 			#Spot is water and MISS
-			self.board1.setSpace(x_new,y_new,3)
+			self.board1.setSpace(x_new,y_new,4)
 		elif space_type == 2:
 			#Space type is a hip and HIT, replace sprite with ship
-			self.board1.setSpace(x_new,y_new,4)
+			self.board1.setSpace(x_new,y_new,3)
 
 	def tick(self):
 		if self.myturn == True:
@@ -84,8 +87,8 @@ class PlayerConnection(Protocol):
 					mx, my = pygame.mouse.get_pos()
 					if my < 170 and self.ship_counter == 3:
 						print "Clicked enemy area"
-						my = my + 165
-						self.myturn = False
+						my = my + 170
+						#self.myturn = False
 						self.transport.write(str(mx) + ' ' + str(my))
 					elif my > 170 and self.ship_counter == 0:
 						print "Placing ship 1"
@@ -113,20 +116,14 @@ class PlayerConnection(Protocol):
 						self.ship_counter = self.ship_counter + 1
 						self.transport.write("ready")
 						print "Waiting for player 2 to set pieces"
-						self.myturn = False
+						#self.myturn = False
 						
-			#render player 2 side of board
-			#for x in range (0,5):
-			#	for y in range(0,10):
-			#		if self.board2.getSpace(x,y) == 1:
-			#			self.screen.blit(self.water, ((self.img_size+1)*x, (self.img_size+1)*y))
-			#render player 1 and 2 game board
+			#fill everythin up with water image
 			for x in range (0,10):
 				for y in range(0,10):
 					if self.board1.getSpace(x,y) == 1:
 						self.screen.blit(self.water, ((self.img_size+1)*x, (self.img_size+1)*y))
-					elif self.board1.getSpace(x,y) == 3:
-						self.screen.blit(self.fire, ((self.img_size+1)*x, (self.img_size+1)*y))
+
 			#show moving ship
 			if self.ship_counter < 3:
 				self.screen.blit(self.battleship, (mx, my))
@@ -141,9 +138,12 @@ class PlayerConnection(Protocol):
 				self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))	
 				self.screen.blit(self.battleship3, (self.ship3_x,self.ship3_y))
 
-	
-			#screen.blit(self.board1.fire, (self.board1.img_size+1, self.board1.img_size+1))
-			#screen.blit(self.board1.battleship, (mx,my))
+			#Overwrite water and ship with fire image
+			for x in range (0,10):
+				for y in range(0,10):
+					if self.board1.getSpace(x,y) == 3:
+						self.screen.blit(self.fire, ((self.img_size+1)*x, (self.img_size+1)*y))						
+
 			pygame.display.flip()
 			pygame.display.set_caption("Player 1")
 			reactor.callLater(.01,self.tick)
