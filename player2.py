@@ -20,9 +20,8 @@ class PlayerConnection(Protocol):
 		self.ship2_y = 0
 		self.ship3_x = 0
 		self.ship3_y = 0
-		self.board1 = Board()
 		self.board2 = Board()
-		self.myturn = True	
+		self.myturn = False	
 
 	def connectionMade(self):
 		"""initialize game, screen, sheets to be displayed, image lists, and callLater function"""
@@ -42,20 +41,23 @@ class PlayerConnection(Protocol):
 		reactor.callLater(.01,self.tick)
 
 	def dataReceived(self,data):
-		"""Receive mouse position of opponent's missle fire"""
-		self.myturn = True
-		str_data = data.split()
-		x_pos = str_data[0]
-		y_pos = str_data[1]
-		self.determineOutcome(float(x_pos),float(y_pos))
+		"""Receive "ready to start" and mouse position of opponent's missle fire"""
+		if data == "ready":
+			self.myturn = True
+		else:
+			self.myturn = True
+			str_data = data.split()
+			x_pos = str_data[0]
+			y_pos = str_data[1]
+			self.determineOutcome(float(x_pos),float(y_pos))
 	
 	def connectionLost(self,reason):
 		print "Connection lost to ",self.addr
 
 	def determineOutcome(x_old,y_old):
 		"""calculate x,y position on 10x10 board, check spot type, perform appropriate action"""
-		x_new = int(math.floor(x_old/33))
-		y_new = int(math.floor(y_old/33))
+		x_new = int(math.floor(x_old/34))
+		y_new = int(math.floor(y_old/34))
 		space_type = self.board2.getSpace(x_new,y_new)
 		if space_type == 1:
 			#Spot is water and MISS
@@ -74,7 +76,7 @@ class PlayerConnection(Protocol):
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
 					reactor.stop() # just stop somehow
 				#placing initial ships, get mouse position
-				elif event.type == pygame.MOUSEMOTION and self.ship_counter < 1:
+				elif event.type == pygame.MOUSEMOTION and self.ship_counter < 3:
 					mx, my = pygame.mouse.get_pos()
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					#valid spot then send coordinates with additional 165 so changes occur on opponent side of board; elif place ships 1,2,3
@@ -86,36 +88,39 @@ class PlayerConnection(Protocol):
 						self.transport.write(str(mx) + ' ' + str(my))
 					elif my > 165 and self.ship_counter == 0:
 						print "Placing ship 1"
-						self.ship1_x = int(math.floor(mx/33)) * 33
-						self.ship1_y = int(math.floor(my/33)) * 33
-						x = int(math.floor(mx/33))
-						y = int(math.floor(my/33))
+						self.ship1_x = int(math.floor(mx/34)) * 34
+						self.ship1_y = int(math.floor(my/34)) * 34
+						x = int(math.floor(mx/34))
+						y = int(math.floor(my/34))
 						self.board2.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
 					elif my > 165 and self.ship_counter == 1:
 						print "Placing ship 2"
-						self.ship2_x = int(math.floor(mx/33)) * 33
-						self.ship2_y = int(math.floor(mx/33)) * 33
-						x = int(math.floor(mx/33))
-						y = int(math.floor(my/33))
+						self.ship2_x = int(math.floor(mx/34)) * 34
+						self.ship2_y = int(math.floor(my/34)) * 34
+						x = int(math.floor(mx/34))
+						y = int(math.floor(my/34))
 						self.board2.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
 					elif my > 165 and self.ship_counter == 2:
 						print "Placing ship 3"
-						self.ship3_x = int(math.floor(mx/33)) * 33
-						self.ship3_y = int(math.floor(my/33)) * 33
-						x = int(math.floor(mx/33))
-						y = int(math.floor(my/33))
+						self.ship3_x = int(math.floor(mx/34)) * 34
+						self.ship3_y = int(math.floor(my/34)) * 34
+						x = int(math.floor(mx/34))
+						y = int(math.floor(my/34))
 						self.board2.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
+						self.transport.write("ready")
+						print "Waiting for player 1's first move"
+						self.myturn = False
 						
-			#render player 1 side of board
-			for x in range (0,5):
-				for y in range(0,10):
-					if self.board1.getSpace(x,y) == 1:
-						self.screen.blit(self.water, ((self.img_size+1)*x, (self.img_size+1)*y))
 			#render player 2 side of board
-			for x in range (5,10):
+			#for x in range (0,5):
+			#	for y in range(0,10):
+			#		if self.board2.getSpace(x,y) == 1:
+			#			self.screen.blit(self.water, ((self.img_size+1)*x, (self.img_size+1)*y))
+			#render player 1 and 2 game board
+			for x in range (0,10):
 				for y in range(0,10):
 					if self.board2.getSpace(x,y) == 1:
 						self.screen.blit(self.water, ((self.img_size+1)*x, (self.img_size+1)*y))
@@ -136,8 +141,8 @@ class PlayerConnection(Protocol):
 				self.screen.blit(self.battleship3, (self.ship3_x,self.ship3_y))
 
 	
-			#screen.blit(self.board1.fire, (self.board1.img_size+1, self.board1.img_size+1))
-			#screen.blit(self.board1.battleship, (mx,my))
+			#screen.blit(self.board2.fire, (self.board1.img_size+1, self.board1.img_size+1))
+			#screen.blit(self.board2.battleship, (mx,my))
 			pygame.display.flip()
 			pygame.display.set_caption("Player 2")
 			reactor.callLater(.01,self.tick)

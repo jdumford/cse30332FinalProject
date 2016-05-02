@@ -42,20 +42,23 @@ class PlayerConnection(Protocol):
 		reactor.callLater(.01,self.tick)
 
 	def dataReceived(self,data):
-		"""Receive mouse position of opponent's missle fire"""
-		self.myturn = True
-		str_data = data.split()
-		x_pos = str_data[0]
-		y_pos = str_data[1]
-		self.determineOutcome(float(x_pos),float(y_pos))
+		"""Receive "ready to start" and mouse position of opponent's missle fire"""
+		if data == "ready":
+			self.myturn = True
+		else:
+			self.myturn = True
+			str_data = data.split()
+			x_pos = str_data[0]
+			y_pos = str_data[1]
+			self.determineOutcome(float(x_pos),float(y_pos))
 	
 	def connectionLost(self,reason):
 		print "Connection lost to ",self.addr
 
 	def determineOutcome(x_old,y_old):
 		"""calculate x,y position on 10x10 board, check spot type, perform appropriate action"""
-		x_new = int(math.floor(x_old/33))
-		y_new = int(math.floor(y_old/33))
+		x_new = int(math.floor(x_old/34))
+		y_new = int(math.floor(y_old/34))
 		space_type = self.board1.getSpace(x_new,y_new)
 		if space_type == 1:
 			#Spot is water and MISS
@@ -79,35 +82,38 @@ class PlayerConnection(Protocol):
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					#valid spot then send coordinates with additional 165 so changes occur on opponent side of board; elif place ships 1,2,3
 					mx, my = pygame.mouse.get_pos()
-					if my < 165:
+					if my < 170 and self.ship_counter == 3:
 						print "Clicked enemy area"
 						my = my + 165
 						self.myturn = False
 						self.transport.write(str(mx) + ' ' + str(my))
-					elif my > 165 and self.ship_counter == 0:
+					elif my > 170 and self.ship_counter == 0:
 						print "Placing ship 1"
 						self.ship1_x = int(math.floor(mx/34)) * 34
 						self.ship1_y = int(math.floor(my/34)) * 34
-						x = int(math.floor(mx/33))
-						y = int(math.floor(my/33))
+						x = int(math.floor(mx/34))
+						y = int(math.floor(my/34))
 						self.board1.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
-					elif my > 165 and self.ship_counter == 1:
+					elif my > 170 and self.ship_counter == 1:
 						print "Placing ship 2"
 						self.ship2_x = int(math.floor(mx/34)) * 34
 						self.ship2_y = int(math.floor(my/34)) * 34
-						x = int(math.floor(mx/33))
-						y = int(math.floor(my/33))
+						x = int(math.floor(mx/34))
+						y = int(math.floor(my/34))
 						self.board1.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
-					elif my > 165 and self.ship_counter == 2:
+					elif my > 170 and self.ship_counter == 2:
 						print "Placing ship 3"
 						self.ship3_x = int(math.floor(mx/34)) * 34
 						self.ship3_y = int(math.floor(my/34)) * 34
-						x = int(math.floor(mx/33))
-						y = int(math.floor(my/33))
+						x = int(math.floor(mx/34))
+						y = int(math.floor(my/34))
 						self.board1.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
+						self.transport.write("ready")
+						print "Waiting for player 2 to set pieces"
+						self.myturn = False
 						
 			#render player 2 side of board
 			#for x in range (0,5):
