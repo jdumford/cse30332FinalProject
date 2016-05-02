@@ -20,7 +20,7 @@ class Board(object):
 			self.Matrix[y][x] = 4
 		for i in range(0,10):
 			for j in range(0,10):
-				print self.Matrix[j][i],
+				print self.Matrix[i][j],
 			print ""
 	def getSpace(self,x,y):
 		return self.Matrix[y][x]

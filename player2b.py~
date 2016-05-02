@@ -7,7 +7,7 @@ from spritesheet import spritesheet
 from board import Board
 
 SERVER_HOST = "student02.cse.nd.edu"
-SERVER_PORT = 40073
+SERVER_PORT = 41073
 
 height = 10
 width = 10
@@ -53,7 +53,7 @@ class PlayerConnection(Protocol):
 
 	def dataReceived(self,data):
 		"""Receive "ready to start" and mouse position of opponent's missle fire"""
-		print "Data received from P2 is {0}".format(data)
+		print "Data received from P1 is {0}".format(data)
 		if data == "ready":
 			self.myturn = True
 			reactor.callLater(.01,self.tick)
@@ -99,7 +99,7 @@ class PlayerConnection(Protocol):
 					self.mx, self.my = pygame.mouse.get_pos()
 					if self.my < pxh/2 and self.ship_counter == 3:
 						print "Clicked enemy area"
-						self.determineOutcome(self.mx, self.my)
+						self.determineOutcome(self.my, self.mx)
 						self.my = self.my + pxh/2
 						self.myturn = False
 						self.transport.write(str(self.mx) + ' ' + str(self.my))
@@ -128,8 +128,8 @@ class PlayerConnection(Protocol):
 						self.board1.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
 						self.transport.write("ready")
-						print "Waiting for player 2 to set pieces"
-						#self.myturn = False
+						print "Waiting for player 1's first move"
+						self.myturn = False
 						
 			#fill everythin up with water image
 			for x in range (0,width):
@@ -158,7 +158,7 @@ class PlayerConnection(Protocol):
 						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))						
 
 			pygame.display.flip()
-			pygame.display.set_caption("Player 1")
+			pygame.display.set_caption("Player 2")
 			reactor.callLater(.01,self.tick)
 
 
