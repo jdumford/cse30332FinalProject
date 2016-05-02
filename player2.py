@@ -2,24 +2,43 @@ from twisted.internet import reactor
 from twisted.internet.protocol import ClientFactory, Protocol
 from twisted.internet.task import LoopingCall
 import pygame
-import cmath
+import math
+from spritesheet import spritesheet
 from board import Board
 
-SERVER_PORT = 41073
 SERVER_HOST = "student02.cse.nd.edu"
+SERVER_PORT = 41073
 
 class PlayerConnection(Protocol):
 	def __init__(self,addr):
-		self.line = 'no message'
-		self.line2 = 'no message 2'
+		self.addr = addr
+		self.img_size = 33
+		self.ship_counter = 0
+		self.ship1_x = 0
+		self.ship1_y = 0
+		self.ship2_x = 0
+		self.ship2_y = 0
+		self.ship3_x = 0
+		self.ship3_y = 0
 		self.board1 = Board()
 		self.board2 = Board()
-		self.addr = addr
-		self.myturn = True
+		self.myturn = True	
 
 	def connectionMade(self):
+		"""initialize game, screen, sheets to be displayed, image lists, and callLater function"""
 		pygame.init()
-		self.screen = pygame.display.set_mode((500, 500))
+		self.screen = pygame.display.set_mode(((self.img_size+1)*10, (self.img_size+1)*10))
+		watersheet = spritesheet("sprites/water.png")
+		self.water = watersheet.image_at((50, 50, self.img_size, self.img_size))
+		firesheet = spritesheet("sprites/fire.png")
+		self.fire = firesheet.image_at((50, 50, self.img_size, self.img_size))
+		boatsheet = spritesheet("sprites/battleships.png")
+		self.battleship = boatsheet.image_at((93, 130, self.img_size, 100))
+		self.battleship1 = boatsheet.image_at((93, 130, self.img_size, 100))
+		self.battleship2 = boatsheet.image_at((93, 130, self.img_size, 100))
+		self.battleship3 = boatsheet.image_at((93, 130, self.img_size, 100))	
+		
+
 		reactor.callLater(.01,self.tick)
 
 	def dataReceived(self,data):
@@ -28,45 +47,101 @@ class PlayerConnection(Protocol):
 		str_data = data.split()
 		x_pos = str_data[0]
 		y_pos = str_data[1]
-		self.determineOutcome(x_pos,y_pos)
-		
-#		self.line = data
-	def determineOutcome(x_old,y_old):
-		"""calculate x,y position on 10x10 board, check spot type, perform appropriate action"""
-		x_new = int(math.floor(x_old*2/100))
-		y_new = int(math.floor(y_old*2/100))
-		space_type = self.board2.getSpace(x_new,y_new)
-		if space_type == 1:
-			#Spot is water and MISS; replace water with miss sprite
-			pass
-		elif space_type == 2:
-			#Spot is a ship and HIT; replace sprite with ship
-			pass
-
+		self.determineOutcome(float(x_pos),float(y_pos))
+	
 	def connectionLost(self,reason):
 		print "Connection lost to ",self.addr
 
+	def determineOutcome(x_old,y_old):
+		"""calculate x,y position on 10x10 board, check spot type, perform appropriate action"""
+		x_new = int(math.floor(x_old/33))
+		y_new = int(math.floor(y_old/33))
+		space_type = self.board2.getSpace(x_new,y_new)
+		if space_type == 1:
+			#Spot is water and MISS
+			self.board2.setSpace(x_new,y_new,3)
+		elif space_type == 2:
+			#Space type is a hip and HIT, replace sprite with ship
+			self.board2.setSpace(x_new,y_new,4)
+
 	def tick(self):
 		if self.myturn == True:
-			self.screen.fill((0,0,0))
+			mx, my = 0,0
+			self.screen.fill((0,0,0))			
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					reactor.stop()# just stop somehow
+					reactor.stop() # just stop somehow
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
 					reactor.stop() # just stop somehow
-				elif event.type == pygame.MOUSEBUTTONDOWN:
-					#valid spot then send coordinates with additional 250 so changes occur on opponent side of board
+				#placing initial ships, get mouse position
+				elif event.type == pygame.MOUSEMOTION and self.ship_counter < 1:
 					mx, my = pygame.mouse.get_pos()
-					if my < 250:
-						my = my + 250
+				elif event.type == pygame.MOUSEBUTTONDOWN:
+					#valid spot then send coordinates with additional 165 so changes occur on opponent side of board; elif place ships 1,2,3
+					mx, my = pygame.mouse.get_pos()
+					if my < 165:
+						print "Clicked enemy area"
+						my = my + 165
 						self.myturn = False
 						self.transport.write(str(mx) + ' ' + str(my))
+					elif my > 165 and self.ship_counter == 0:
+						print "Placing ship 1"
+						self.ship1_x = int(math.floor(mx/33)) * 33
+						self.ship1_y = int(math.floor(my/33)) * 33
+						x = int(math.floor(mx/33))
+						y = int(math.floor(my/33))
+						self.board2.setSpace(x,y,2)
+						self.ship_counter = self.ship_counter + 1
+					elif my > 165 and self.ship_counter == 1:
+						print "Placing ship 2"
+						self.ship2_x = int(math.floor(mx/33)) * 33
+						self.ship2_y = int(math.floor(mx/33)) * 33
+						x = int(math.floor(mx/33))
+						y = int(math.floor(my/33))
+						self.board2.setSpace(x,y,2)
+						self.ship_counter = self.ship_counter + 1
+					elif my > 165 and self.ship_counter == 2:
+						print "Placing ship 3"
+						self.ship3_x = int(math.floor(mx/33)) * 33
+						self.ship3_y = int(math.floor(my/33)) * 33
+						x = int(math.floor(mx/33))
+						y = int(math.floor(my/33))
+						self.board2.setSpace(x,y,2)
+						self.ship_counter = self.ship_counter + 1
+						
+			#render player 1 side of board
+			for x in range (0,5):
+				for y in range(0,10):
+					if self.board1.getSpace(x,y) == 1:
+						self.screen.blit(self.water, ((self.img_size+1)*x, (self.img_size+1)*y))
+			#render player 2 side of board
+			for x in range (5,10):
+				for y in range(0,10):
+					if self.board2.getSpace(x,y) == 1:
+						self.screen.blit(self.water, ((self.img_size+1)*x, (self.img_size+1)*y))
+					elif self.board2.getSpace(x,y) == 3:
+						self.screen.blit(self.fire, ((self.img_size+1)*x, (self.img_size+1)*y))
+			#show moving ship
+			if self.ship_counter < 3:
+				self.screen.blit(self.battleship, (mx, my))
+			#on clicks, ships are placed
+			if self.ship_counter == 1:
+				self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
+			elif self.ship_counter == 2:
+				self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
+				self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))
+			elif self.ship_counter == 3:
+				self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
+				self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))	
+				self.screen.blit(self.battleship3, (self.ship3_x,self.ship3_y))
 
-			self.screen.blit(pygame.font.SysFont('mono', 12, bold=True).render(self.line, True, (0, 255, 0)), (20,20))
-			self.screen.blit(pygame.font.SysFont('mono', 12, bold=True).render(self.line2, True, (0, 255, 0)), (30,30))
-			pygame.display.flip()
-			reactor.callLater(.01,self.tick)
 	
+			#screen.blit(self.board1.fire, (self.board1.img_size+1, self.board1.img_size+1))
+			#screen.blit(self.board1.battleship, (mx,my))
+			pygame.display.flip()
+			pygame.display.set_caption("Player 2")
+			reactor.callLater(.01,self.tick)
+
 
 class PlayerConnectionFactory(ClientFactory):
 	def __init__(self):
