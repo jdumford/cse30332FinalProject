@@ -46,9 +46,17 @@ class spritesheet(object):
     firesheet = spritesheet("sprites/fire.png")
     fire = firesheet.image_at((415, 20, img_size, img_size))
 
+    misssheet = spritesheet("sprites/miss.png")
+    miss = misssheet.image_at((455, 182, img_size, img_size))
+
     #boat = pygame.image.load("sprites/BattleShip.png").convert()
     boatsheet = spritesheet("sprites/battleships.png")
     battleship = boatsheet.image_at((93, 130, img_size, 100))
+    battleship2 = boatsheet.image_at((249, 128, img_size, 66))
+
+    #winsheet = spritesheet("sprites/win.png")
+    win = pygame.image.load("sprites/win.png").convert()
+    lose = pygame.image.load("sprites/lose.png").convert()
 
     while(1):
         for event in pygame.event.get():
@@ -61,6 +69,11 @@ class spritesheet(object):
                 screen.blit(water, ((img_size+1)*x, (img_size+1)*y))
         screen.blit(fire, (img_size+1, img_size+1))
         screen.blit(battleship, (mx, my))
+        screen.blit(battleship2, (200, 200))
+        screen.blit(miss, (100, 100))
+        screen.blit(win, (20, 100))
+        screen.blit(lose, (20, 200))
 
         pygame.display.flip()
+
 """

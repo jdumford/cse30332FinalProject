@@ -96,6 +96,7 @@ class PlayerConnection(Protocol):
 		if space_type == 1:
 			#Spot is water and MISS
 			self.board1.setSpace(x_new,y_new,4)
+			
 		elif space_type == 2 or space_type == 5:
 			#Space type is a hip and HIT, replace sprite with ship
 			self.board1.setSpace(x_new,y_new,3)
