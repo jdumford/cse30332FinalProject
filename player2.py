@@ -196,7 +196,8 @@ class PlayerConnection(Protocol):
 			for x in range (0,width):
 				for y in range(0,height):
 					if self.board2.getSpace(x,y) == 3:
-						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))							if self.board1.getSpace(x,y) == 4:
+						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))							
+					if self.board1.getSpace(x,y) == 4:
 						self.screen.blit(self.miss, ((ipx+1)*x, (ipx+1)*y))
 
 			if self.win == True:
