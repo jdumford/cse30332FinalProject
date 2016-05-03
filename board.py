@@ -8,12 +8,17 @@ import numpy
 class Board(object):
 	def __init__(self):
 		self.Matrix = [[1 for x in range(10)] for y in range(10)]
+		self.opp_ship_spaces = 9
 	
 	def setSpace(self,x,y,new):
+		current_space  = self.Matrix[y][x]
 		if new == 2: #ship
 			self.Matrix[y][x] = new
 			self.Matrix[y+1][x] = new
 			self.Matrix[y+2][x] = new
+		elif new == 3 and current_space == 5:
+			self.Matrix[y][x] = new
+			self.opp_ship_spaces -= 1
 		else:
 			self.Matrix[y][x] = new
 		
@@ -25,4 +30,13 @@ class Board(object):
 	def getSpace(self,x,y):
 		return self.Matrix[y][x]
 		
+	def checkWin(self):
+		if self.opp_ship_spaces == 0:
+			return True
+		else:
+			return False
+
+
+
+
 
