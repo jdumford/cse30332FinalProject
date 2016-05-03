@@ -30,11 +30,12 @@ class PlayerConnection(Protocol):
 		self.ship3_y = 0
 		self.mx = 0
 		self.my = 0
-		self.board1 = Board()
+		self.board2 = Board()
 		self.board2 = Board()
 		self.myturn = True
 		self.set = False
 		self.changeboard = False
+		#self.sendboard = False
 
 	def connectionMade(self):
 		"""initialize game, screen, sheets to be displayed, image lists, and callLater function"""
@@ -55,26 +56,28 @@ class PlayerConnection(Protocol):
 
 	def dataReceived(self,data):
 		"""Receive "ready to start" and mouse position of opponent's missle fire"""
-		print "Data received from P2 is {0}".format(data)
+		print "Data received from P1 is {0}".format(data)
 		if len(data) > 10:
-			#self.myturn = True
+			#self.myturn = False
 			#self.changeboard = True
+			#self.sendboard = True
 			#reactor.callLater(.01,self.tick)
 		#elif self.changeboard == True:
 			str_data = data.split()
-			print str_data
+                        print str_data
 			for i in range(0, width):
 				for j in range(0, height/2):
 					x = float(str_data[(i*(height/2)) + j])
-					print x
-					if x == 2:
-						print "HERE!!!!!!!!"
-						self.board1.setSpace(i, j, 5)
-			reactor.callLater(.01,self.tick)
+					if x ==2:
+						self.board2.setSpace(i,j, 5)
+			#self.changeboard = False
+                        reactor.callLater(.01,self.tick)
+		elif data == "end game":
+			self.myturn = False
+			print "Player 2, you lose..."
 		else:
 			self.myturn = True
 			str_data = data.split()
-			print str_data
 			x_pos = str_data[0]
 			y_pos = str_data[1]
 			self.determineOutcome(float(x_pos),float(y_pos))
@@ -88,24 +91,24 @@ class PlayerConnection(Protocol):
 		x_new = int(math.floor(x_old/(ipx+1)))
 		y_new = int(math.floor(y_old/(ipx+1)))
 		print "xnew and ynew = {0} {1}".format(x_new,y_new)
-		space_type = self.board1.getSpace(x_new,y_new)
+		space_type = self.board2.getSpace(x_new,y_new)
 		print "space type = {0}".format(space_type)
 		if space_type == 1:
 			#Spot is water and MISS
-			self.board1.setSpace(x_new,y_new,4)
+			self.board2.setSpace(x_new,y_new,4)
 		elif space_type == 2 or space_type == 5:
 			#Space type is a hip and HIT, replace sprite with ship
-			self.board1.setSpace(x_new,y_new,3)
+			self.board2.setSpace(x_new,y_new,3)
 
 	def tick(self):
-		if self.changeboard == True:
-			data_str = ''
-			for i in range(0, width):
-				for j in range(height/2, height):
-					data_str = data_str + ' ' + str(self.board1.getSpace(j, i))
-			self.transport.write(data_str)
+                if self.changeboard == True:
+                        data_str = ''
+                        for i in range(0, width):
+                                for j in range(height/2, height):
+                                        data_str = data_str + ' ' + str(self.board2.getSpace(i, j))
 			self.changeboard = False
 			self.myturn = False
+			self.transport.write(data_str)
 
 		elif self.myturn == True:
 			self.screen.fill((0,0,0))			
@@ -126,14 +129,19 @@ class PlayerConnection(Protocol):
 						self.determineOutcome(self.mx, self.my)
 						self.my = self.my + pxh/2
 						self.myturn = False
-						self.transport.write(str(self.mx) + ' ' + str(self.my))
+						if self.board2.checkWin() is True:
+							self.myturn = False
+							print 'Player 2, you win!'
+							self.transport.write("end game")
+						else:
+							self.transport.write(str(self.mx) + ' ' + str(self.my))
 					elif self.my > pxh/2 and self.ship_counter == 0:
 						print "Placing ship 1"
 						self.ship1_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship1_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						self.board1.setSpace(x,y,2)
+						self.board2.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
 					elif self.my > pxh/2 and self.ship_counter == 1:
 						print "Placing ship 2"
@@ -141,7 +149,7 @@ class PlayerConnection(Protocol):
 						self.ship2_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						self.board1.setSpace(x,y,2)
+						self.board2.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
 					elif self.my > pxh/2 and self.ship_counter == 2:
 						print "Placing ship 3"
@@ -149,17 +157,16 @@ class PlayerConnection(Protocol):
 						self.ship3_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						self.board1.setSpace(x,y,2)
+						self.board2.setSpace(x,y,2)
 						self.ship_counter = self.ship_counter + 1
 						#self.transport.write("ready")
-						self.set = True
-						print "Waiting for player 2 to set pieces"
+						print "Waiting for player 1's first move"
 						self.changeboard = True
 						
 			#fill everythin up with water image
 			for x in range (0,width):
 				for y in range(0,height):
-					if self.board1.getSpace(x,y) == 1 or self.board1.getSpace(x,y) == 5:
+					if self.board2.getSpace(x,y) == 1 or self.board2.getSpace(x,y) == 5:
 						self.screen.blit(self.water, ((ipx+1)*x, (ipx+1)*y))
 
 			#show moving ship
@@ -179,11 +186,11 @@ class PlayerConnection(Protocol):
 			#Overwrite water and ship with fire image
 			for x in range (0,width):
 				for y in range(0,height):
-					if self.board1.getSpace(x,y) == 3:
-						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))
+					if self.board2.getSpace(x,y) == 3:
+						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))						
 
 			pygame.display.flip()
-			pygame.display.set_caption("Player 1")
+			pygame.display.set_caption("Player 2")
 			reactor.callLater(.01,self.tick)
 
 
