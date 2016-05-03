@@ -159,34 +159,34 @@ class PlayerConnection(Protocol):
 							self.board2.setSpace(x,y+1,2)
 							self.board2.setSpace(x,y+2,2)
 							self.ship_counter = self.ship_counter + 1
-					elif self.my > pxh/2 and self.ship_counter == 1 && self.board2.getSpace(x,y) == 1 && self.board2.getSpace(x,y+1) == 1:
+					elif self.my > pxh/2 and self.ship_counter == 1:
 						print "Placing ship 2"
 						self.ship2_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship2_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						if y < height - 1:
+						if y < height - 1 and self.board2.getSpace(x,y) == 1 and self.board2.getSpace(x,y+1) == 1:
 							self.board2.setSpace(x,y,2)
 							self.board2.setSpace(x,y+1,2)
 							self.ship_counter = self.ship_counter + 1
-					elif self.my > pxh/2 and self.ship_counter == 2 && self.board2.getSpace(x,y) == 1 && self.board2.getSpace(x+1,y) == 1 && self.board2.getSpace(x+2,y) == 1:
+					elif self.my > pxh/2 and self.ship_counter == 2:
 						print "Placing ship 3"
 						self.ship3_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship3_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						if x < width - 2:
+						if x < width - 2 and self.board2.getSpace(x,y) == 1 and self.board2.getSpace(x+1,y) == 1 and self.board2.getSpace(x+2,y) == 1:
 							self.board2.setSpace(x,y,2)
 							self.board2.setSpace(x+1,y,2)
 							self.board2.setSpace(x+2,y,2)
 							self.ship_counter = self.ship_counter + 1
-					elif self.my > pxh/2 and self.ship_counter == 3 && self.board2.getSpace(x,y) == 1 && self.board2.getSpace(x+1,y) == 1:
+					elif self.my > pxh/2 and self.ship_counter == 3:
 						print "Placing ship 4"
 						self.ship4_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship4_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						if x < width - 1:
+						if x < width - 1 and self.board2.getSpace(x,y) == 1 and self.board2.getSpace(x+1,y) == 1:
 							self.board2.setSpace(x,y,2)
 							self.board2.setSpace(x+1,y,2)
 							self.ship_counter = self.ship_counter + 1
