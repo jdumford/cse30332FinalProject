@@ -12,11 +12,7 @@ class Board(object):
 	
 	def setSpace(self,x,y,new):
 		current_space  = self.Matrix[y][x]
-		if new == 2: #ship
-			self.Matrix[y][x] = new
-			self.Matrix[y+1][x] = new
-			self.Matrix[y+2][x] = new
-		elif new == 3 and current_space == 5:
+		if new == 3 and current_space == 5:
 			self.Matrix[y][x] = new
 			self.opp_ship_spaces -= 1
 		else:
