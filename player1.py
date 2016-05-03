@@ -82,6 +82,7 @@ class PlayerConnection(Protocol):
 			self.myturn = True
 			self.lose = True
 			print "Player 1, you lose..."
+			self.tick()
 		else:
 			self.myturn = True
 			str_data = data.split()
@@ -111,11 +112,11 @@ class PlayerConnection(Protocol):
 		return False
 
 	def tick(self):
-                if self.changeboard == True:
-                        data_str = ''
-                        for i in range(0, width):
-                                for j in range(height/2, height):
-                                        data_str = data_str + ' ' + str(self.board1.getSpace(i, j))
+		if self.changeboard == True:
+			data_str = ''
+			for i in range(0, width):
+				for j in range(height/2, height):
+					data_str = data_str + ' ' + str(self.board1.getSpace(i, j))
 			self.changeboard = False
 			self.myturn = True
 			self.transport.write(data_str)
@@ -200,7 +201,6 @@ class PlayerConnection(Protocol):
 						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))
 					if self.board1.getSpace(x,y) == 4:
 						self.screen.blit(self.miss, ((ipx+1)*x, (ipx+1)*y))
-
 			if self.win == True:
 				self.screen.blit(self.win_image, (20, 100))
 				self.myturn = False
