@@ -96,10 +96,12 @@ class PlayerConnection(Protocol):
 		if space_type == 1:
 			#Spot is water and MISS
 			self.board1.setSpace(x_new,y_new,4)
-			
+			return True
 		elif space_type == 2 or space_type == 5:
 			#Space type is a hip and HIT, replace sprite with ship
 			self.board1.setSpace(x_new,y_new,3)
+			return True
+		return False
 
 	def tick(self):
                 if self.changeboard == True:
@@ -127,15 +129,15 @@ class PlayerConnection(Protocol):
 					self.mx, self.my = pygame.mouse.get_pos()
 					if self.my < pxh/2 and self.ship_counter == 3:
 						print "Clicked enemy area"
-						self.determineOutcome(self.mx, self.my)
-						self.my = self.my + pxh/2
-						self.myturn = False
-						if self.board1.checkWin() is True:
+						if (self.determineOutcome(self.mx, self.my)):
+							self.my = self.my + pxh/2
 							self.myturn = False
-							print 'Player 1, you win!!'
-							self.transport.write("end game")
-						else:
-							self.transport.write(str(self.mx) + ' ' + str(self.my))
+							if self.board1.checkWin() is True:
+								self.myturn = False
+								print 'Player 1, you win!!'
+								self.transport.write("end game")
+							else:
+								self.transport.write(str(self.mx) + ' ' + str(self.my))
 					elif self.my > pxh/2 and self.ship_counter == 0:
 						print "Placing ship 1"
 						self.ship1_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
@@ -188,7 +190,7 @@ class PlayerConnection(Protocol):
 			for x in range (0,width):
 				for y in range(0,height):
 					if self.board1.getSpace(x,y) == 3:
-						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))						
+						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))
 
 			pygame.display.flip()
 			pygame.display.set_caption("Player 1")
