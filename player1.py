@@ -65,7 +65,6 @@ class PlayerConnection(Protocol):
 
 	def dataReceived(self,data):
 		"""Receive "ready to start" and mouse position of opponent's missle fire"""
-		print "Data received from P1 is {0}".format(data)
 		if len(data) > 10:
 			self.myturn = True
 			#self.changeboard = True
