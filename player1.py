@@ -73,7 +73,6 @@ class PlayerConnection(Protocol):
 			#reactor.callLater(.01,self.tick)
 		#elif self.changeboard == True:
 			str_data = data.split()
-                        print str_data
 			for i in range(0, width):
 				for j in range(0, height/2):
 					x = float(str_data[(i*(height/2)) + j])
@@ -101,9 +100,7 @@ class PlayerConnection(Protocol):
 		"""calculate x,y position on 10x10 board, check spot type, perform appropriate action"""
 		x_new = int(math.floor(x_old/(ipx+1)))
 		y_new = int(math.floor(y_old/(ipx+1)))
-		print "xnew and ynew = {0} {1}".format(x_new,y_new)
 		space_type = self.board1.getSpace(x_new,y_new)
-		print "space type = {0}".format(space_type)
 		if space_type == 1:
 			#Spot is water and MISS
 			self.board1.setSpace(x_new,y_new,4)
@@ -139,7 +136,6 @@ class PlayerConnection(Protocol):
 					#occur on opponent side of board; elif place ships 1,2,3
 					self.mx, self.my = pygame.mouse.get_pos()
 					if self.my < pxh/2 and self.ship_counter == 4:
-						print "Clicked enemy area"
 						if (self.determineOutcome(self.mx, self.my)):
 							self.my = self.my + pxh/2
 							self.myturn = False
@@ -150,7 +146,6 @@ class PlayerConnection(Protocol):
 							else:
 								self.transport.write(str(self.mx) + ' ' + str(self.my))
 					elif self.my > pxh/2 and self.ship_counter == 0:
-						print "Placing ship 1"
 						self.ship1_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship1_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
@@ -161,7 +156,6 @@ class PlayerConnection(Protocol):
 							self.board1.setSpace(x,y+2,2)
 							self.ship_counter = self.ship_counter + 1
 					elif self.my > pxh/2 and self.ship_counter == 1:
-						print "Placing ship 2"
 						self.ship2_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship2_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
@@ -171,7 +165,6 @@ class PlayerConnection(Protocol):
 							self.board1.setSpace(x,y+1,2)
 							self.ship_counter = self.ship_counter + 1
 					elif self.my > pxh/2 and self.ship_counter == 2:
-						print "Placing ship 3"
 						self.ship3_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship3_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
@@ -182,7 +175,6 @@ class PlayerConnection(Protocol):
 							self.board1.setSpace(x+2,y,2)
 							self.ship_counter = self.ship_counter + 1
 					elif self.my > pxh/2 and self.ship_counter == 3:
-						print "Placing ship 4"
 						self.ship4_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
 						self.ship4_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
@@ -191,7 +183,6 @@ class PlayerConnection(Protocol):
 							self.board1.setSpace(x,y,2)
 							self.board1.setSpace(x+1,y,2)
 							self.ship_counter = self.ship_counter + 1
-							print "Waiting for player 1's first move"
 							self.changeboard = True
 
 			#fill everythin up with water image
