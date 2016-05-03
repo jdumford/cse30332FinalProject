@@ -1,0 +1,25 @@
+Jacob Dumford and David Lewis
+Battleship
+Programming Paradigms Final Project
+
+
+For our project, we decided to program our own version of the classic game Battleship.
+The rules of the game are that each player places his/her 4 ships on his half of the
+board and then attempts to shoot the other player's ships. The opposing player's ships
+are unseen, and all you know is whether an attempt was a hit or a miss. The first player
+to sink all of the other players ships, wins.
+
+
+How to run the code:
+
+1. ssh into student02.cse.nd.edu and run the server code with the command: python server.py
+2. connect to the server with player1 from any computer with the command: python player1.py
+3. connect to the server with player2 from any computer with the command: python player2.py
+
+
+How to play the game:
+
+Once both players are connected, both players should place their ships on the bottom half of 
+the screen. Once both players have placed their ships, player1 will go first. The players
+then take turns clicking in the top half of the screen attempting to sink the other player's
+ships. Once one player has sunk all ships, the game will end automatically.
