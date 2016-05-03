@@ -51,9 +51,12 @@ class PlayerConnection(Protocol):
 		self.miss = misssheet.image_at((455, 182, self.img_size, self.img_size))
 		boatsheet = spritesheet("sprites/battleships.png")
 		self.battleship = boatsheet.image_at((93, 130, self.img_size, 100))
-		self.battleship1 = boatsheet.image_at((93, 130, self.img_size, 100))
-		self.battleship2 = boatsheet.image_at((93, 130, self.img_size, 100))
-		self.battleship3 = boatsheet.image_at((93, 130, self.img_size, 100))	
+                self.battleship1 = boatsheet.image_at((93, 130, self.img_size, 100))
+                self.battleship2 = boatsheet.image_at((249, 128, self.img_size, 67))
+                self.battleship3 = boatsheet.image_at((93, 130, self.img_size, 100))
+                self.battleship3 = pygame.transform.rotate(self.battleship3, 90)
+                self.battleship4 = boatsheet.image_at((249, 128, self.img_size, 67))
+                self.battleship4 = pygame.transform.rotate(self.battleship4, 90)
 		self.win_image = pygame.image.load("sprites/win.png").convert()
 		self.lose_image = pygame.image.load("sprites/lose.png").convert()
 		
@@ -128,13 +131,13 @@ class PlayerConnection(Protocol):
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
 					reactor.stop() # just stop somehow
 				#placing initial ships, get mouse position
-				elif event.type == pygame.MOUSEMOTION and self.ship_counter < 3:
+				elif event.type == pygame.MOUSEMOTION and self.ship_counter < 4:
 					self.mx, self.my = pygame.mouse.get_pos()
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					#valid spot then send coordinates with additional 165 so changes 
 					#occur on opponent side of board; elif place ships 1,2,3
 					self.mx, self.my = pygame.mouse.get_pos()
-					if self.my < pxh/2 and self.ship_counter == 3:
+					if self.my < pxh/2 and self.ship_counter == 4:
 						print "Clicked enemy area"
 						if(self.determineOutcome(self.mx, self.my)):
 							self.my = self.my + pxh/2
@@ -152,6 +155,8 @@ class PlayerConnection(Protocol):
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
 						self.board2.setSpace(x,y,2)
+						self.board2.setSpace(x,y+1,2)
+                                                self.board2.setSpace(x,y+2,2)
 						self.ship_counter = self.ship_counter + 1
 					elif self.my > pxh/2 and self.ship_counter == 1:
 						print "Placing ship 2"
@@ -160,6 +165,7 @@ class PlayerConnection(Protocol):
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
 						self.board2.setSpace(x,y,2)
+						self.board2.setSpace(x,y+1,2)
 						self.ship_counter = self.ship_counter + 1
 					elif self.my > pxh/2 and self.ship_counter == 2:
 						print "Placing ship 3"
@@ -168,10 +174,24 @@ class PlayerConnection(Protocol):
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
 						self.board2.setSpace(x,y,2)
+						self.board2.setSpace(x+1,y,2)
+						self.board2.setSpace(x+2,y,2)
 						self.ship_counter = self.ship_counter + 1
 						#self.transport.write("ready")
-						print "Waiting for player 1's first move"
-						self.changeboard = True
+						#print "Waiting for player 1's first move"
+						#self.changeboard = True
+                                        elif self.my > pxh/2 and self.ship_counter == 3:
+                                                print "Placing ship 4"
+                                                self.ship4_x = int(math.floor(self.mx/(ipx+1))) * (ipx+1)
+                                                self.ship4_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
+                                                x = int(math.floor(self.mx/(ipx+1)))
+                                                y = int(math.floor(self.my/(ipx+1)))
+                                                self.board2.setSpace(x,y,2)
+                                                self.board2.setSpace(x+1,y,2)
+                                                self.ship_counter = self.ship_counter + 1
+                                                #self.transport.write("ready")
+                                                print "Waiting for player 1's first move"
+                                                self.changeboard = True
 						
 			#fill everythin up with water image
 			for x in range (0,width):
@@ -180,24 +200,32 @@ class PlayerConnection(Protocol):
 						self.screen.blit(self.water, ((ipx+1)*x, (ipx+1)*y))
 
 			#show moving ship
-			if self.ship_counter < 3:
+			if self.ship_counter == 0:
 				self.screen.blit(self.battleship, (self.mx, self.my))
 			#on clicks, ships are placed
 			if self.ship_counter == 1:
 				self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
-			elif self.ship_counter == 2:
-				self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
-				self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))
-			elif self.ship_counter == 3:
-				self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
-				self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))	
-				self.screen.blit(self.battleship3, (self.ship3_x,self.ship3_y))
+                                self.screen.blit(self.battleship2, (self.mx, self.my))
+                        elif self.ship_counter == 2:
+                                self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
+                                self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))
+                                self.screen.blit(self.battleship3, (self.mx, self.my))
+                        elif self.ship_counter == 3:
+                                self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
+                                self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))
+                                self.screen.blit(self.battleship3, (self.ship3_x,self.ship3_y))
+                                self.screen.blit(self.battleship4, (self.mx, self.my))
+                        elif self.ship_counter == 4:
+                                self.screen.blit(self.battleship1, (self.ship1_x,self.ship1_y))
+                                self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))
+                                self.screen.blit(self.battleship3, (self.ship3_x,self.ship3_y))
+                                self.screen.blit(self.battleship4, (self.ship4_x,self.ship4_y))
 
 			#Overwrite water and ship with fire image
 			for x in range (0,width):
 				for y in range(0,height):
 					if self.board2.getSpace(x,y) == 3:
-						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))							
+						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))
 					if self.board2.getSpace(x,y) == 4:
 						self.screen.blit(self.miss, ((ipx+1)*x, (ipx+1)*y))
 
