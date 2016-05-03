@@ -8,7 +8,7 @@ import numpy
 class Board(object):
 	def __init__(self):
 		self.Matrix = [[1 for x in range(10)] for y in range(10)]
-		self.opp_ship_spaces = 9
+		self.opp_ship_spaces = 10
 	
 	def setSpace(self,x,y,new):
 		current_space  = self.Matrix[y][x]
