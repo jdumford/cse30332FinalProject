@@ -14,14 +14,14 @@ class Board(object):
 			self.Matrix[y][x] = new
 			self.Matrix[y+1][x] = new
 			self.Matrix[y+2][x] = new
-		elif new == 3: #HIT
-			self.Matrix[y][x] = 3
-		elif new == 4: #MISS
-			self.Matrix[y][x] = 4
+		else:
+			self.Matrix[y][x] = new
+		
 		for i in range(0,10):
 			for j in range(0,10):
 				print self.Matrix[i][j],
 			print ""
+	
 	def getSpace(self,x,y):
 		return self.Matrix[y][x]
 		
