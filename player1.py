@@ -155,7 +155,7 @@ class PlayerConnection(Protocol):
 						self.ship1_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						if y < height - 2:
+						if y < height - 2 and self.board1.getSpace(x,y) == 1 and self.board1.getSpace(x,y+1) == 1 and self.board1.getSpace(x,y+2) == 1:
 							self.board1.setSpace(x,y,2)
 							self.board1.setSpace(x,y+1,2)
 							self.board1.setSpace(x,y+2,2)
@@ -166,7 +166,7 @@ class PlayerConnection(Protocol):
 						self.ship2_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						if y < height - 1:
+						if y < height - 1 and self.board1.getSpace(x,y) == 1 and self.board1.getSpace(x,y+1) == 1:
 							self.board1.setSpace(x,y,2)
 							self.board1.setSpace(x,y+1,2)
 							self.ship_counter = self.ship_counter + 1
@@ -176,7 +176,7 @@ class PlayerConnection(Protocol):
 						self.ship3_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						if x < width - 2:
+						if x < width - 2 and self.board1.getSpace(x,y) == 1 and self.board1.getSpace(x+1,y) == 1 and self.board1.getSpace(x+2,y) == 1:
 							self.board1.setSpace(x,y,2)
 							self.board1.setSpace(x+1,y,2)
 							self.board1.setSpace(x+2,y,2)
@@ -187,7 +187,7 @@ class PlayerConnection(Protocol):
 						self.ship4_y = int(math.floor(self.my/(ipx+1))) * (ipx+1)
 						x = int(math.floor(self.mx/(ipx+1)))
 						y = int(math.floor(self.my/(ipx+1)))
-						if x < width - 1:
+						if x < width - 1 and self.board1.getSpace(x,y) == 1 and self.board1.getSpace(x+1,y) == 1:
 							self.board1.setSpace(x,y,2)
 							self.board1.setSpace(x+1,y,2)
 							self.ship_counter = self.ship_counter + 1
