@@ -4,7 +4,7 @@ from pygame.locals import *
 import numpy
 
 
-"""1 is water, 2 is ship, 3 is HIT, 4 is miss"""
+"""1 is water, 2 is ship, 3 is HIT, 4 is miss, 5 is opponent ship"""
 class Board(object):
 	def __init__(self):
 		self.Matrix = [[1 for x in range(10)] for y in range(10)]
