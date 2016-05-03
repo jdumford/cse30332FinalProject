@@ -36,6 +36,8 @@ class PlayerConnection(Protocol):
 		self.set = False
 		self.changeboard = False
 		#self.sendboard = False
+		self.win = False
+		self.lose = False
 
 	def connectionMade(self):
 		"""initialize game, screen, sheets to be displayed, image lists, and callLater function"""
@@ -45,13 +47,16 @@ class PlayerConnection(Protocol):
 		self.water = watersheet.image_at((50, 50, self.img_size, self.img_size))
 		firesheet = spritesheet("sprites/fire.png")
 		self.fire = firesheet.image_at((415, 22, self.img_size, self.img_size))
+		misssheet = spritesheet("sprites/miss.png")
+		self.miss = misssheet.image_at((455, 182, self.img_size, self.img_size))
 		boatsheet = spritesheet("sprites/battleships.png")
 		self.battleship = boatsheet.image_at((93, 130, self.img_size, 100))
 		self.battleship1 = boatsheet.image_at((93, 130, self.img_size, 100))
 		self.battleship2 = boatsheet.image_at((93, 130, self.img_size, 100))
 		self.battleship3 = boatsheet.image_at((93, 130, self.img_size, 100))	
+		self.win_image = pygame.image.load("sprites/win.png").convert()
+		self.lose_image = pygame.image.load("sprites/lose.png").convert()
 		
-
 		reactor.callLater(.01,self.tick)
 
 	def dataReceived(self,data):
@@ -73,7 +78,8 @@ class PlayerConnection(Protocol):
 			#self.changeboard = False
                         reactor.callLater(.01,self.tick)
 		elif data == "end game":
-			self.myturn = False
+			self.myturn = True
+			self.lose = True
 			print "Player 2, you lose..."
 		else:
 			self.myturn = True
@@ -133,8 +139,8 @@ class PlayerConnection(Protocol):
 							self.my = self.my + pxh/2
 							self.myturn = False
 							if self.board2.checkWin() is True:
-								self.myturn = False
 								print 'Player 2, you win!'
+								self.win = True
 								self.transport.write("end game")
 							else:
 								self.transport.write(str(self.mx) + ' ' + str(self.my))
@@ -190,7 +196,15 @@ class PlayerConnection(Protocol):
 			for x in range (0,width):
 				for y in range(0,height):
 					if self.board2.getSpace(x,y) == 3:
-						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))						
+						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))							if self.board1.getSpace(x,y) == 4:
+						self.screen.blit(self.miss, ((ipx+1)*x, (ipx+1)*y))
+
+			if self.win == True:
+				self.screen.blit(self.win_image, (20, 100))
+				self.myturn = False
+			if self.lose == True:
+				self.screen.blit(self.lose_image, (20,100))
+				self.myturn = False
 
 			pygame.display.flip()
 			pygame.display.set_caption("Player 2")

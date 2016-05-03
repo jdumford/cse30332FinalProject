@@ -35,6 +35,8 @@ class PlayerConnection(Protocol):
 		self.myturn = True
 		self.set = False
 		self.changeboard = False
+		self.win = False
+		self.lose = False
 		#self.sendboard = False
 
 	def connectionMade(self):
@@ -45,11 +47,15 @@ class PlayerConnection(Protocol):
 		self.water = watersheet.image_at((50, 50, self.img_size, self.img_size))
 		firesheet = spritesheet("sprites/fire.png")
 		self.fire = firesheet.image_at((415, 22, self.img_size, self.img_size))
+		misssheet = spritesheet("sprites/miss.png")
+		self.miss = misssheet.image_at((455, 182, self.img_size, self.img_size))
 		boatsheet = spritesheet("sprites/battleships.png")
 		self.battleship = boatsheet.image_at((93, 130, self.img_size, 100))
 		self.battleship1 = boatsheet.image_at((93, 130, self.img_size, 100))
 		self.battleship2 = boatsheet.image_at((93, 130, self.img_size, 100))
 		self.battleship3 = boatsheet.image_at((93, 130, self.img_size, 100))	
+		self.win_image = pygame.image.load("sprites/win.png").convert()
+		self.lose_image = pygame.image.load("sprites/lose.png").convert()
 		
 
 		reactor.callLater(.01,self.tick)
@@ -73,7 +79,8 @@ class PlayerConnection(Protocol):
 			#self.changeboard = False
                         reactor.callLater(.01,self.tick)
 		elif data == "end game":
-			self.myturn = False
+			self.myturn = True
+			self.lose = True
 			print "Player 1, you lose..."
 		else:
 			self.myturn = True
@@ -132,9 +139,9 @@ class PlayerConnection(Protocol):
 						if (self.determineOutcome(self.mx, self.my)):
 							self.my = self.my + pxh/2
 							self.myturn = False
-							if self.board1.checkWin() is True:
-								self.myturn = False
+							if self.board1.checkWin() is True:	
 								print 'Player 1, you win!!'
+								self.win = True
 								self.transport.write("end game")
 							else:
 								self.transport.write(str(self.mx) + ' ' + str(self.my))
@@ -186,11 +193,20 @@ class PlayerConnection(Protocol):
 				self.screen.blit(self.battleship2, (self.ship2_x,self.ship2_y))	
 				self.screen.blit(self.battleship3, (self.ship3_x,self.ship3_y))
 
-			#Overwrite water and ship with fire image
+			#Overwrite water and ship with fire (hit) or splash (miss) image
 			for x in range (0,width):
 				for y in range(0,height):
 					if self.board1.getSpace(x,y) == 3:
 						self.screen.blit(self.fire, ((ipx+1)*x, (ipx+1)*y))
+					if self.board1.getSpace(x,y) == 4:
+						self.screen.blit(self.miss, ((ipx+1)*x, (ipx+1)*y))
+
+			if self.win == True:
+				self.screen.blit(self.win_image, (20, 100))
+				self.myturn = False
+			if self.lose == True:
+				self.screen.blit(self.lose_image, (20,100))
+				self.myturn = False
 
 			pygame.display.flip()
 			pygame.display.set_caption("Player 1")
