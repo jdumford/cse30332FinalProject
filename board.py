@@ -17,12 +17,7 @@ class Board(object):
 			self.opp_ship_spaces -= 1
 		else:
 			self.Matrix[y][x] = new
-		
-		for i in range(0,10):
-			for j in range(0,10):
-				print self.Matrix[i][j],
-			print ""
-	
+			
 	def getSpace(self,x,y):
 		return self.Matrix[y][x]
 		
